@@ -1,5 +1,3 @@
-import './story-end.css';
-
 export async function createScreen({ mountEl, screenManager }) {
   const wrapper = document.createElement('div');
   wrapper.innerHTML = `<section class="screen story-end" data-screen="story-end">
