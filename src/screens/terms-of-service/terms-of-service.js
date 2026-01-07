@@ -95,7 +95,7 @@ export async function createScreen({ mountEl, screenManager }) {
 
   const el = wrapper.firstElementChild;
   const bgEl = el.querySelector('[data-role="bg"]');
-  const panelEl = el.querySelector('[data-role="tos-panel']') || el.querySelector('[data-role="tos-panel"]');
+  const panelEl = el.querySelector('[data-role="tos-panel]') || el.querySelector('[data-role="tos-panel"]');
 
   panelEl.textContent = TERMS_TEXT;
 
