@@ -1,6 +1,6 @@
-import { screenManager } from './screen-manager.js';
-import { inputLock } from './input-lock.js';
-import { stateStore } from './state-store.js';
+import { screenManager } from '/VerseCraft-Ultimate/src/core/screen-manager.js';
+import { inputLock } from '/VerseCraft-Ultimate/src/core/input-lock.js';
+import { stateStore } from '/VerseCraft-Ultimate/src/core/state-store.js';
 
 function showBootError(message) {
   const app = document.getElementById('app');
