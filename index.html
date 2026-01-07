@@ -1,10 +1,6 @@
 <!doctype html>
 <html lang="en">
 <head>
- - screenManager.go('terms-of-service');
-+ screenManager.go('main-menu');
-  - import(`/VerseCraft-Ultimate/src/screens/${screenId}/${screenId}.js`)
-+ import(`./src/screens/${screenId}/${screenId}.js`)
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <base href="/VerseCraft-Ultimate/">
@@ -39,7 +35,6 @@
           </div>`;
       }
 
-      // After 2 seconds, if bootstrap didn't mark itself as booted, show a stronger hint.
       setTimeout(() => {
         if (!window.__vcBooted) {
           const overlay = document.createElement('div');
@@ -56,6 +51,6 @@
     })();
   </script>
 
-  <script type="module" src="/VerseCraft-Ultimate/src/core/bootstrap.js"></script>
+  <script type="module" src="./src/core/bootstrap.js"></script>
 </body>
 </html>
