@@ -1,11 +1,11 @@
 import './splash.css';
 
-export async function createScreen({ mountEl, screenmanager }) {
+export async function createScreen({ mountEl, screenManager }) {
   const wrapper = document.createElement('div');
   wrapper.innerHTML = `<section class="screen splash" data-screen="splash">
   <div class="screen-bg" aria-hidden="true"></div>
   <div class="screen-ui">
-    <h1 class="screen-title">Splash</h1>
+    <h1 class="screen-title">splash</h1>
     <p class="screen-note">placeholder screen. replace with pre-rendered background + hitboxes.</p>
     <div class="screen-actions">
       <button type="button" data-action="next">next</button>
