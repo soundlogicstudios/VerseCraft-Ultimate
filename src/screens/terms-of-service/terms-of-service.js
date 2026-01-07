@@ -1,5 +1,3 @@
-import './terms-of-service.css';
-
 export async function createScreen({ mountEl, screenManager }) {
   const wrapper = document.createElement('div');
   wrapper.innerHTML = `
