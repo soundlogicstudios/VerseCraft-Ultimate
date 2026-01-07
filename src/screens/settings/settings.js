@@ -1,5 +1,3 @@
-import './settings.css';
-
 export async function createScreen({ mountEl, screenManager }) {
   const wrapper = document.createElement('div');
   wrapper.innerHTML = `<section class="screen settings" data-screen="settings">
