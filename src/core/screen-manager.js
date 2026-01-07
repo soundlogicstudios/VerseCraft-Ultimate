@@ -1,7 +1,7 @@
 const mounted = new Map();
 
 async function loadScreen(screenId) {
-  return import(`../screens/${screenId}/${screenId}.js`);
+  return import(`/VerseCraft-Ultimate/src/screens/${screenId}/${screenId}.js`);
 }
 
 export const screenManager = {
