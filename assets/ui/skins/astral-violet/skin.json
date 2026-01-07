@@ -1,0 +1,15 @@
+{
+  "skin-id": "astral-violet",
+  "scope": "global-world-only",
+  "frames": {
+    "frame-full": "assets/ui/skins/astral-violet/frames/frame-full.webp",
+    "frame-panel": "assets/ui/skins/astral-violet/frames/frame-panel.webp"
+  },
+  "backgrounds": {
+    "splash": "assets/ui/skins/astral-violet/backgrounds/splash.webp",
+    "menu": "assets/ui/skins/astral-violet/backgrounds/menu.webp"
+  },
+  "tokens": {
+    "accent": "#ffffff"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "skin-id": "sterile-clean",
+  "scope": "global-world-only",
+  "frames": {
+    "frame-full": "assets/ui/skins/sterile-clean/frames/frame-full.webp",
+    "frame-panel": "assets/ui/skins/sterile-clean/frames/frame-panel.webp"
+  },
+  "backgrounds": {
+    "splash": "assets/ui/skins/sterile-clean/backgrounds/splash.webp",
+    "menu": "assets/ui/skins/sterile-clean/backgrounds/menu.webp"
+  },
+  "tokens": {
+    "accent": "#ffffff"
+  }
+}
