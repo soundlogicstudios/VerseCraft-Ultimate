@@ -1,5 +1,3 @@
-import './story-roll-log.css';
-
 export async function createScreen({ mountEl, screenManager }) {
   const wrapper = document.createElement('div');
   wrapper.innerHTML = `<section class="screen story-roll-log" data-screen="story-roll-log">
