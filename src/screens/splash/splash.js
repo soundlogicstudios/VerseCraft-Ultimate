@@ -1,6 +1,6 @@
 import './splash.css';
 
-export async function createScreen({ mountEl, screenManager }) {
+export async function createScreen({ mountEl, screenmanager }) {
   const wrapper = document.createElement('div');
   wrapper.innerHTML = `<section class="screen splash" data-screen="splash">
   <div class="screen-bg" aria-hidden="true"></div>
