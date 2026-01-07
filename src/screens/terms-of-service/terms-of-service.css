@@ -1,46 +1,50 @@
-/* terms-of-service screen css: screen-local only */
-.terms-of-service {
+.screen.terms-of-service .screen-bg {
   position: absolute;
   inset: 0;
-  width: 100%;
+}
+
+.tos-shell {
+  position: relative;
   height: 100%;
-  overflow: hidden;
+  padding: 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.terms-of-service .screen-bg {
-  position: absolute;
-  inset: 0;
-  background: #111;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-
-.terms-of-service .screen-ui {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+.tos-header {
+  flex: 0 0 auto;
   text-align: center;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
-.terms-of-service .screen-title {
-  margin: 0 0 8px 0;
-  font-size: 20px;
+.tos-title {
+  margin: 0;
+  font-size: 22px;
 }
 
-.terms-of-service .screen-note {
-  margin: 0 0 16px 0;
-  opacity: 0.8;
-  max-width: 34ch;
-}
-
-.terms-of-service button {
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.25);
+.tos-scroll {
+  flex: 1 1 auto;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px;
+  border-radius: 12px;
   background: rgba(0,0,0,0.35);
-  color: #fff;
+}
+
+.tos-text {
+  max-width: 740px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+.tos-actions {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+}
+
+.tos-accept {
+  padding: 12px 18px;
+  border-radius: 12px;
 }
