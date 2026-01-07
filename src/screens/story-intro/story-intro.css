@@ -1,0 +1,46 @@
+/* story-intro screen css: screen-local only */
+.story-intro {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.story-intro .screen-bg {
+  position: absolute;
+  inset: 0;
+  background: #111;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.story-intro .screen-ui {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+  text-align: center;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+.story-intro .screen-title {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+}
+
+.story-intro .screen-note {
+  margin: 0 0 16px 0;
+  opacity: 0.8;
+  max-width: 34ch;
+}
+
+.story-intro button {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(0,0,0,0.35);
+  color: #fff;
+}
