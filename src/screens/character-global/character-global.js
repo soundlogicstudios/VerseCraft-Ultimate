@@ -1,5 +1,3 @@
-import './character-global.css';
-
 export async function createScreen({ mountEl, screenManager }) {
   const wrapper = document.createElement('div');
   wrapper.innerHTML = `<section class="screen character-global" data-screen="character-global">
