@@ -1,50 +1,102 @@
+/* ======================================================
+   Terms of Service Screen - Alignment Fix v2.7.7.8
+   ====================================================== */
+
+.screen.terms-of-service {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* prevent page scroll */
+}
+
 .screen.terms-of-service .screen-bg {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+  pointer-events: none;
 }
 
+/* Outer shell - locked to full view */
 .tos-shell {
   position: relative;
+  z-index: 1;
+  width: 100%;
   height: 100%;
-  padding: 16px;
-  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0; /* remove default padding that caused insets */
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
+/* Header title (centered at top) */
 .tos-header {
   flex: 0 0 auto;
   text-align: center;
+  margin-top: env(safe-area-inset-top, 12px);
 }
 
 .tos-title {
-  margin: 0;
   font-size: 22px;
+  font-family: 'Cinzel Decorative', serif;
+  color: #e8dcb0;
+  text-shadow: 0 0 10px rgba(255,240,200,0.5);
 }
 
+/* Scroll container now bounds text safely */
 .tos-scroll {
   flex: 1 1 auto;
-  overflow: auto;
+  width: 80%;
+  max-width: 720px;
+  margin: 12px auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  padding: 12px;
-  border-radius: 12px;
-  background: rgba(0,0,0,0.35);
+  background: rgba(0,0,0,0.4);
+  border-radius: 8px;
+  padding: 16px;
+  line-height: 1.4;
+  color: #d6c8a2;
+  scrollbar-width: thin;
 }
 
-.tos-text {
-  max-width: 740px;
-  margin: 0 auto;
-  line-height: 1.5;
+.tos-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.tos-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.25);
+  border-radius: 3px;
 }
 
+/* Accept button area */
 .tos-actions {
   flex: 0 0 auto;
-  display: flex;
-  justify-content: center;
+  margin-bottom: env(safe-area-inset-bottom, 12px);
 }
 
-.tos-accept {
-  padding: 12px 18px;
-  border-radius: 12px;
+#hbTosAccept {
+  position: relative;
+  display: inline-block;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #e8dcb0;
+  font-family: 'Cinzel', serif;
+  font-size: 1em;
+  padding: 0.8em 1.6em;
+  border-radius: 6px;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+#hbTosAccept:hover {
+  background: rgba(255,255,255,0.2);
+  transform: scale(1.03);
 }
