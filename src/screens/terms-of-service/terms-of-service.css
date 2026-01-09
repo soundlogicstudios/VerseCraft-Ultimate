@@ -99,7 +99,8 @@
 #hbTosAccept:hover {
   background: rgba(255,255,255,0.2);
   transform: scale(1.03);
-}/* =====================================================
+}
+/* =====================================================
    PWA Safe-Area Override (iOS only)
    ===================================================== */
 @supports(padding: env(safe-area-inset-top)) {
