@@ -1,7 +1,8 @@
 /*
  * VerseCraft Legacy Wrapper
- * v2.9.3-LockStage
- * Locks global scroll, preserves cyan outlines, XY calibration HUD.
+ * v2.9.4-SafeFrameRestore
+ * Fixes frame squish on Terms of Service by exempting its screen
+ * from global overflow lock while maintaining debug calibration.
  */
 
 import { DebugManager } from "./debug-manager.js";
@@ -11,7 +12,7 @@ export class LegacyWrapper {
     this.enabled = false;
     this.hud = null;
     this.gear = null;
-    this.version = "v2.9.3-LockStage";
+    this.version = "v2.9.4-SafeFrameRestore";
   }
 
   init() {
@@ -27,7 +28,7 @@ export class LegacyWrapper {
     const style = document.createElement("style");
     style.id = "debug-style";
     style.textContent = `
-      /* Cyan outlines visible when debug active */
+      /* Cyan outlines for hitboxes */
       body.debug-mode .hitbox,
       body.debug-mode [data-hitbox] {
         outline: 2px dashed rgba(0,255,255,0.9);
@@ -44,9 +45,15 @@ export class LegacyWrapper {
       }
 
       html, body {
-        overflow: hidden !important;  /* 🚫 No global scroll ever */
+        overflow: hidden !important; /* Stage lock */
         height: 100%;
-        touch-action: none; /* Disable swipe scroll gestures */
+        touch-action: none;
+      }
+
+      /* ✅ Exception: Allow full rendering + scroll for TOS */
+      #screen-tos, #screen-terms, .screen-tos {
+        overflow: auto !important;
+        touch-action: pan-y;
       }
 
       #debugHUD {
@@ -116,7 +123,7 @@ export class LegacyWrapper {
     this.updateHUD("Debug disabled");
     this.unbindXY();
     this.cleanupOverlays();
-    this.lockStage(); // keep scroll locked even after disabling
+    this.lockStage();
     DebugManager.broadcast("onDisable");
   }
 
@@ -151,10 +158,16 @@ export class LegacyWrapper {
   }
 
   lockStage() {
-    // Keep all screens fixed and non-scrollable
+    // Lock every screen EXCEPT the Terms of Service
     document.querySelectorAll(".screen").forEach(s => {
-      s.style.overflow = "hidden";
-      s.style.pointerEvents = "auto"; // allow normal taps
+      if (s.id === "screen-tos" || s.classList.contains("screen-tos") || s.id === "screen-terms") {
+        s.style.overflow = "auto";
+        s.style.touchAction = "pan-y";
+      } else {
+        s.style.overflow = "hidden";
+        s.style.touchAction = "none";
+      }
+      s.style.pointerEvents = "auto";
     });
   }
 
