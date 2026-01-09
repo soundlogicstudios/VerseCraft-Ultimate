@@ -1,7 +1,7 @@
 /**
  * screen-registry.js
- * Dynamically loads and registers all screens.
- * v2.7.8-UltimateLifecycleDiag prep
+ * v2.7.8-UltimateLifecycleDiag
+ * Dynamically loads and registers all screens safely.
  */
 
 export async function registerScreens(screenManager) {
@@ -20,10 +20,18 @@ export async function registerScreens(screenManager) {
   for (const name of screens) {
     try {
       const module = await import(`../screens/${name}/${name}.js`);
-      screenManager.register(name, module.createScreen);
-      console.log(`🧩 Screen loaded: ${name}`);
+      const factory = module?.createScreen || module?.default;
+
+      if (typeof factory === 'function') {
+        screenManager.register(name, factory);
+        console.log(`🧩 Screen registered: ${name}`);
+      } else {
+        console.warn(`⚠️ ${name} has no valid export (createScreen or default).`);
+      }
     } catch (err) {
-      console.warn(`⚠️ Failed to load screen: ${name}`, err);
+      console.warn(`🚫 Failed to load or register screen: ${name}`, err);
     }
   }
+
+  console.log('✅ Screen registration complete.');
 }
