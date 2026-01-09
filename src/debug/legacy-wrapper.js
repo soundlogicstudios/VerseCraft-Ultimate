@@ -1,7 +1,8 @@
 /*
- * VerseCraft Legacy Wrapper
- * v2.7.5-SafeAreaFix
- * Fixes: TOS frame cropping, hitbox offset on iPhone safe area
+ * VerseCraft Ultimate - Legacy Wrapper
+ * v2.7.6-UltimateDiag
+ * Diagnostic-safe build for viewport alignment, safe-area padding, and scroll locking.
+ * Compatible with Ultimate architecture.
  */
 
 import { DebugManager } from "./debug-manager.js";
@@ -9,12 +10,14 @@ import { DebugManager } from "./debug-manager.js";
 export class LegacyWrapper {
   constructor() {
     this.enabled = false;
-    this.version = "v2.7.5-SafeAreaFix";
+    this.version = "v2.7.6-UltimateDiag";
     this.hud = null;
     this.gear = null;
+    this.diagInterval = null;
   }
 
   init() {
+    console.log(`[LegacyWrapper] Initializing ${this.version}`);
     this.injectCSS();
     this.createGear();
     this.createHUD();
@@ -34,7 +37,7 @@ export class LegacyWrapper {
         background-color: black;
       }
 
-      /* --- Safe Area Compensation --- */
+      /* Respect iPhone safe areas */
       body {
         padding-left: env(safe-area-inset-left);
         padding-right: env(safe-area-inset-right);
@@ -43,7 +46,7 @@ export class LegacyWrapper {
         box-sizing: border-box;
       }
 
-      /* Only ToS scrolls, with safe area respected */
+      /* Scroll unlock ONLY for ToS screen */
       #screen-tos, .screen-tos, #tosText {
         overflow-y: auto !important;
         touch-action: pan-y !important;
@@ -54,7 +57,7 @@ export class LegacyWrapper {
         align-items: center;
       }
 
-      /* Hitboxes centered correctly */
+      /* Cyan hitbox outlines */
       body.debug-mode .hitbox,
       body.debug-mode [data-hitbox] {
         outline: 2px dashed rgba(0,255,255,0.8);
@@ -63,20 +66,23 @@ export class LegacyWrapper {
         transform: translateX(calc(-1 * env(safe-area-inset-left)));
       }
 
+      /* Debug HUD */
       #debugHUD {
         position: fixed;
         bottom: calc(6px + env(safe-area-inset-bottom));
         left: calc(8px + env(safe-area-inset-left));
-        background: rgba(0,0,0,0.65);
-        color: #0ff;
+        background: rgba(0,0,0,0.8);
+        color: #00ffff;
         font-size: 11px;
         font-family: monospace;
-        padding: 4px 8px;
+        padding: 6px 10px;
         border-radius: 4px;
         z-index: 2147483646;
         pointer-events: none;
+        text-shadow: 0 0 3px #000;
       }
 
+      /* Gear icon for toggle */
       #debugGear {
         position: fixed;
         bottom: calc(6px + env(safe-area-inset-bottom));
@@ -120,6 +126,7 @@ export class LegacyWrapper {
     document.body.classList.add("debug-mode");
     this.updateHUD("Debug enabled");
     this.bindXY();
+    this.startDiagnostics();
     DebugManager.broadcast("onEnable");
   }
 
@@ -127,6 +134,7 @@ export class LegacyWrapper {
     document.body.classList.remove("debug-mode");
     this.updateHUD("Debug disabled");
     this.unbindXY();
+    this.stopDiagnostics();
     DebugManager.broadcast("onDisable");
   }
 
@@ -155,6 +163,31 @@ export class LegacyWrapper {
     }
   }
 
+  startDiagnostics() {
+    this.stopDiagnostics();
+    const hud = document.getElementById("debugHUD");
+    const update = () => {
+      if (!hud || !this.enabled) return;
+      const vv = window.visualViewport;
+      const sa = {
+        top: getComputedStyle(document.body).getPropertyValue("padding-top"),
+        bottom: getComputedStyle(document.body).getPropertyValue("padding-bottom"),
+        left: getComputedStyle(document.body).getPropertyValue("padding-left"),
+        right: getComputedStyle(document.body).getPropertyValue("padding-right")
+      };
+      hud.innerHTML += `<br>[Viewport] ${Math.round(vv.width)}×${Math.round(vv.height)}<br>
+        offsetY:${Math.round(vv.offsetTop)} insetT:${sa.top.trim()} insetB:${sa.bottom.trim()}`;
+    };
+    this.diagInterval = setInterval(update, 1000);
+  }
+
+  stopDiagnostics() {
+    if (this.diagInterval) {
+      clearInterval(this.diagInterval);
+      this.diagInterval = null;
+    }
+  }
+
   updateHUD(status) {
     const hud = document.getElementById("debugHUD");
     if (!hud) return;
@@ -164,7 +197,10 @@ export class LegacyWrapper {
   }
 }
 
-window.LegacyWrapper = new LegacyWrapper();
-window.addEventListener("DOMContentLoaded", () => {
-  window.LegacyWrapper.init();
-});
+/* Register globally for Ultimate architecture */
+if (typeof window !== "undefined") {
+  window.LegacyWrapper = new LegacyWrapper();
+  window.addEventListener("DOMContentLoaded", () => {
+    window.LegacyWrapper.init();
+  });
+}
