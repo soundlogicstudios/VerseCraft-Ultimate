@@ -1,81 +1,84 @@
 // src/screens/terms-of-service/terms-of-service.js
-import { stateStore } from '../../core/state-store.js';
+// ===========================================================
+// Terms of Service Screen - Refactored for Layout Control v2.7.7.11
+// ===========================================================
+
+import { stateStore } from "../../core/state-store.js";
 
 function assetUrl(relPathFromThisFile) {
   return new URL(relPathFromThisFile, import.meta.url).href;
 }
 
 export async function createScreen({ mountEl, screenManager }) {
-  const bgUrl = assetUrl('../../assets/global/backgrounds/tos.png');
+  const bgUrl = assetUrl("../../assets/global/backgrounds/tos.png");
 
-  const wrapper = document.createElement('div');
+  // Construct the screen structure dynamically (minimal inline styles)
+  const wrapper = document.createElement("div");
   wrapper.innerHTML = `
-    <section class="screen terms-of-service" data-screen="terms-of-service"
-      style="position:relative; width:100%; height:100%;">
-
+    <section class="screen terms-of-service" data-screen="terms-of-service">
       <!-- Background -->
       <div class="screen-bg" aria-hidden="true"
         style="
-          position:absolute; inset:0;
           background-image:url('${bgUrl}');
-          background-size:cover;
-          background-position:center;
-          background-repeat:no-repeat;
         ">
       </div>
 
-      <!-- ACCEPT hitbox (transparent) -->
-      <button type="button" data-action="accept" aria-label="Accept Terms of Service"
-        style="
-          position:absolute;
-          left:8%;
-          right:8%;
-          bottom:6%;
-          height:14%;
-          background:transparent;
-          border:0;
-          padding:0;
-          margin:0;
-          cursor:pointer;
-          -webkit-tap-highlight-color: transparent;
-        ">
-      </button>
+      <!-- Shell for title, scroll area, and button -->
+      <div class="tos-shell">
+        <!-- Title -->
+        <header class="tos-header">
+          <h1 class="tos-title">Terms of Service</h1>
+        </header>
 
-      <!-- Optional: Back / Decline hitbox (disabled for now) -->
-      <!--
-      <button type="button" data-action="back" aria-label="Back"
-        style="position:absolute; left:3%; top:3%; width:20%; height:10%; background:transparent; border:0;">
-      </button>
-      -->
+        <!-- Scrollable Text Box -->
+        <div class="tos-scroll">
+          <p>Welcome to VerseCraft. By using this app, you agree to abide by all terms and conditions set forth in this document. The purpose of this app is to provide an interactive storytelling experience and community platform for creative projects.</p>
+          <p>We collect minimal user data to enhance your experience. You may not use this service to distribute harmful or unlawful content. All narrative material remains property of its respective creators.</p>
+          <p>By continuing, you acknowledge these terms and consent to our policies. Thank you for being part of VerseCraft.</p>
+        </div>
+
+        <!-- Accept Button -->
+        <div class="tos-actions">
+          <button id="hbTosAccept" type="button" data-action="accept" aria-label="Accept Terms">
+            Accept
+          </button>
+        </div>
+      </div>
     </section>
   `;
 
   const el = wrapper.firstElementChild;
 
+  // ===========================================================
+  // Interaction Logic
+  // ===========================================================
   function onClick(e) {
-    const accept = e.target.closest('button[data-action="accept"]');
+    const accept = e.target.closest("button[data-action='accept']");
     if (accept) {
-      // Persist the flag so Splash/ToS never appear again
-      stateStore.set?.('tosAccepted', true);
-
-      // Route to menu (or login later)
-      screenManager.go('main-menu');
+      // Store acceptance to skip next time
+      stateStore.set?.("tosAccepted", true);
+      screenManager.go("main-menu");
       return;
-    }
-
-    const back = e.target.closest('button[data-action="back"]');
-    if (back) {
-      screenManager.go('splash');
     }
   }
 
+  // ===========================================================
+  // Lifecycle Hooks
+  // ===========================================================
   return {
     mount() {
       mountEl.appendChild(el);
-      el.addEventListener('click', onClick);
+      el.addEventListener("click", onClick);
+
+      // Remove any global inset padding — Terms screen controls layout itself
+      el.style.paddingTop = "0";
+      el.style.paddingBottom = "0";
+      el.style.marginTop = "0";
+      el.style.marginBottom = "0";
+      el.style.overflow = "hidden";
     },
     unmount() {
-      el.removeEventListener('click', onClick);
-    }
+      el.removeEventListener("click", onClick);
+    },
   };
 }
