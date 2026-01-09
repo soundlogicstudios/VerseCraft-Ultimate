@@ -1,8 +1,10 @@
 /*
  * VerseCraft Legacy Wrapper
- * v2.9.4-SafeFrameRestore
- * Fixes frame squish on Terms of Service by exempting its screen
- * from global overflow lock while maintaining debug calibration.
+ * v2.9.5-CalibrateHUD
+ * Adds visual calibration overlay for each hitbox:
+ *  - Corner markers (cyan)
+ *  - Label showing ID + size
+ *  - Keeps scroll locked globally except TOS
  */
 
 import { DebugManager } from "./debug-manager.js";
@@ -10,9 +12,10 @@ import { DebugManager } from "./debug-manager.js";
 export class LegacyWrapper {
   constructor() {
     this.enabled = false;
+    this.version = "v2.9.5-CalibrateHUD";
     this.hud = null;
     this.gear = null;
-    this.version = "v2.9.4-SafeFrameRestore";
+    this.labelOverlays = [];
   }
 
   init() {
@@ -28,14 +31,24 @@ export class LegacyWrapper {
     const style = document.createElement("style");
     style.id = "debug-style";
     style.textContent = `
-      /* Cyan outlines for hitboxes */
+      html, body {
+        overflow: hidden !important;
+        height: 100%;
+        touch-action: none;
+      }
+
+      #screen-tos, #screen-terms, .screen-tos {
+        overflow: auto !important;
+        touch-action: pan-y;
+      }
+
       body.debug-mode .hitbox,
       body.debug-mode [data-hitbox] {
         outline: 2px dashed rgba(0,255,255,0.9);
         border: 1px solid rgba(0,255,255,0.6);
         outline-offset: -2px;
-        z-index: 99998;
-        pointer-events: auto;
+        position: relative;
+        z-index: 99997;
         animation: dbgPulse 1.5s ease-in-out infinite alternate;
       }
 
@@ -44,16 +57,25 @@ export class LegacyWrapper {
         100% { border-color: rgba(0,255,255,1); }
       }
 
-      html, body {
-        overflow: hidden !important; /* Stage lock */
-        height: 100%;
-        touch-action: none;
+      .calib-label {
+        position: absolute;
+        background: rgba(0,0,0,0.7);
+        color: #0ff;
+        font-size: 9px;
+        font-family: monospace;
+        border-radius: 2px;
+        padding: 2px 3px;
+        z-index: 99998;
+        pointer-events: none;
       }
 
-      /* ✅ Exception: Allow full rendering + scroll for TOS */
-      #screen-tos, #screen-terms, .screen-tos {
-        overflow: auto !important;
-        touch-action: pan-y;
+      .corner-marker {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        border: 1px solid #0ff;
+        background: rgba(0,255,255,0.2);
+        z-index: 99999;
       }
 
       #debugHUD {
@@ -114,7 +136,7 @@ export class LegacyWrapper {
     document.body.classList.add("debug-mode");
     this.updateHUD("Debug enabled");
     this.bindXY();
-    this.lockStage();
+    this.drawCalibrationOverlays();
     DebugManager.broadcast("onEnable");
   }
 
@@ -122,8 +144,7 @@ export class LegacyWrapper {
     document.body.classList.remove("debug-mode");
     this.updateHUD("Debug disabled");
     this.unbindXY();
-    this.cleanupOverlays();
-    this.lockStage();
+    this.removeCalibrationOverlays();
     DebugManager.broadcast("onDisable");
   }
 
@@ -140,7 +161,8 @@ export class LegacyWrapper {
       hud.innerHTML = `[XY] (${Math.round(t.clientX)}, ${Math.round(t.clientY)})<br>
         Tag: ${el.tagName}<br>
         ID: ${el.id || "(none)"}<br>
-        Screen: ${section?.id || "(none)"}`;
+        Screen: ${section?.id || "(none)"}<br>
+        Version: ${this.version}`;
     };
     document.addEventListener("touchstart", this.xyHandler, { passive: true });
   }
@@ -152,31 +174,50 @@ export class LegacyWrapper {
     }
   }
 
-  cleanupOverlays() {
-    document.querySelectorAll(".debug-hitbox-layer, .debug-touch-pointer, .debug-xy-overlay")
-      .forEach(el => el.remove());
-  }
-
-  lockStage() {
-    // Lock every screen EXCEPT the Terms of Service
-    document.querySelectorAll(".screen").forEach(s => {
-      if (s.id === "screen-tos" || s.classList.contains("screen-tos") || s.id === "screen-terms") {
-        s.style.overflow = "auto";
-        s.style.touchAction = "pan-y";
-      } else {
-        s.style.overflow = "hidden";
-        s.style.touchAction = "none";
-      }
-      s.style.pointerEvents = "auto";
-    });
-  }
-
   updateHUD(status) {
     const hud = document.getElementById("debugHUD");
     if (!hud) return;
     hud.innerHTML = `[HUD] ${status}<br>
       Screen: ${window.activeScreen || "none"}<br>
       Version: ${this.version}`;
+  }
+
+  drawCalibrationOverlays() {
+    this.removeCalibrationOverlays();
+    const hitboxes = document.querySelectorAll(".hitbox, [data-hitbox]");
+    hitboxes.forEach((box, index) => {
+      const rect = box.getBoundingClientRect();
+
+      // Label
+      const label = document.createElement("div");
+      label.className = "calib-label";
+      label.textContent = `${index}: ${box.id || "(unnamed)"} ${Math.round(rect.width)}×${Math.round(rect.height)}`;
+      label.style.left = `${rect.left + 4}px`;
+      label.style.top = `${rect.top - 12}px`;
+      document.body.appendChild(label);
+      this.labelOverlays.push(label);
+
+      // Corner markers
+      const corners = [
+        [rect.left, rect.top],
+        [rect.right - 6, rect.top],
+        [rect.left, rect.bottom - 6],
+        [rect.right - 6, rect.bottom - 6],
+      ];
+      corners.forEach(([x, y]) => {
+        const mark = document.createElement("div");
+        mark.className = "corner-marker";
+        mark.style.left = `${x}px`;
+        mark.style.top = `${y}px`;
+        document.body.appendChild(mark);
+        this.labelOverlays.push(mark);
+      });
+    });
+  }
+
+  removeCalibrationOverlays() {
+    this.labelOverlays.forEach(el => el.remove());
+    this.labelOverlays = [];
   }
 }
 
