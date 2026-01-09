@@ -1,189 +1,133 @@
-/**
- * VerseCraft Legacy Debug Wrapper
- * v2.7.3-PILLRESTORE
- * - Restores always-visible Debug Pill
- * - Adds 2-finger double-tap shortcut
- * - Keeps pointer and isolation logic intact
+/*
+ * VerseCraft Legacy Wrapper - MicroPatch v2.9.1-PointerFix
+ * Fixes: Navigation lock, scroll freeze, ghost overlays.
  */
 
-console.log("%c[LegacyWrapper] Initializing...", "color: cyan; font-weight: bold;");
-import { initDebug } from "../debug.js";
-import { ScreenIsolation } from "./screen-isolation.js";
+import { DebugManager } from "./debug-manager.js";
 
-export const LegacyDebug = (() => {
-  let initialized = false;
-  let hud;
-  let pill;
-
-  function injectDebugCSS() {
-    const style = document.createElement("style");
-    style.id = "legacy-debug-style";
-    style.textContent = `
-      body.debug [data-hitbox],
-      body.debug .hitbox,
-      body.debug button[id^='hb'] {
-        outline: 2px dashed rgba(0,255,255,0.9) !important;
-        border: 1px solid rgba(0,255,255,0.6) !important;
-        outline-offset: -2px !important;
-        z-index: 2147483647 !important;
-        pointer-events: auto !important;
-        animation: dbgPulse 1.5s ease-in-out infinite alternate;
-      }
-
-      @keyframes dbgPulse {
-        0% { border-color: rgba(0,255,255,0.3); }
-        100% { border-color: rgba(0,255,255,1); }
-      }
-
-      body.debug .screen,
-      body.debug .screen.active,
-      body.debug main.screens {
-        pointer-events: none !important;
-      }
-
-      #debugHUD {
-        position: fixed;
-        bottom: 32px;
-        left: 8px;
-        background: rgba(0,0,0,0.7);
-        color: #0ff;
-        font-family: monospace;
-        font-size: 10px;
-        padding: 4px 6px;
-        border-radius: 3px;
-        z-index: 2147483647;
-        pointer-events: none;
-        white-space: pre-line;
-      }
-
-      #debugBadge {
-        position: fixed;
-        bottom: 80px;
-        right: 10px;
-        background: rgba(0,0,0,0.75);
-        color: #0ff;
-        font-family: monospace;
-        font-size: 10px;
-        padding: 4px 6px;
-        border-radius: 3px;
-        z-index: 2147483647;
-        pointer-events: none;
-      }
-
-      #btnDebug {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        border: 1px solid rgba(0,255,255,0.5);
-        background: rgba(0,0,0,0.6);
-        color: #0ff;
-        font-size: 20px;
-        font-weight: bold;
-        z-index: 2147483647;
-        text-align: center;
-        line-height: 46px;
-        cursor: pointer;
-        pointer-events: auto;
-      }
-      #btnDebug:active {
-        background: rgba(0,255,255,0.2);
-      }
-    `;
-    document.head.appendChild(style);
-    console.log("[LegacyWrapper] CSS injected v2.7.3-PILLRESTORE");
+export class LegacyWrapper {
+  constructor() {
+    this.enabled = false;
+    this.hud = null;
+    this.gear = null;
+    this.version = "v2.9.1-PointerFix";
   }
 
-  function injectHUD() {
-    hud = document.createElement("div");
-    hud.id = "debugHUD";
-    hud.textContent = "HUD: waiting...";
-    document.body.appendChild(hud);
+  init() {
+    this.createGear();
+    this.createHUD();
+    DebugManager.register("LegacyWrapper", this.version);
+    this.updateHUD("HUD waiting...");
   }
 
-  function injectPill() {
-    pill = document.getElementById("btnDebug");
-    if (!pill) {
-      pill = document.createElement("div");
-      pill.id = "btnDebug";
-      pill.textContent = "⚙️";
-      document.body.appendChild(pill);
-    }
-    pill.addEventListener("click", toggleDebug);
-  }
-
-  function resetPointerEvents() {
-    const screens = document.querySelectorAll(".screen, .screen.active, main.screens, .hitbox");
-    screens.forEach(el => el.style.pointerEvents = "auto");
-    void document.body.offsetHeight;
-    console.log("%c[PointerFix] Pointer events reset", "color: lime;");
-  }
-
-  function toggleDebug() {
-    const isActive = document.body.classList.toggle("debug");
-    hud.textContent = isActive ? "HUD: Debug ENABLED" : "HUD: Debug DISABLED";
-    if (isActive) ScreenIsolation.updateVisibility();
-    else resetPointerEvents();
-    console.log("%c[LegacyWrapper] Debug " + (isActive ? "ENABLED" : "DISABLED"), "color: yellow;");
-  }
-
-  function enableTouchXY() {
-    document.addEventListener("touchstart", (e) => {
-      const debugOn = document.body.classList.contains("debug");
-      const t = e.touches[0];
-      const el = document.elementFromPoint(t.clientX, t.clientY);
-      if (!debugOn) return;
-
-      if (el) {
-        const section = el.closest("section[id^='screen-']");
-        hud.textContent =
-          `[XY] (${Math.round(t.clientX)}, ${Math.round(t.clientY)})\n` +
-          `Tag: ${el.tagName}\n` +
-          `ID: ${el.id || "(none)"}\n` +
-          `Class: ${el.className || "(none)"}\n` +
-          `Screen: ${section?.id || "(none)"}`;
-        if (el.id?.startsWith("hb")) el.click();
-      }
+  createGear() {
+    if (this.gear) return;
+    this.gear = document.createElement("div");
+    this.gear.id = "debugGear";
+    this.gear.textContent = "⚙️";
+    Object.assign(this.gear.style, {
+      position: "fixed",
+      bottom: "6px",
+      right: "10px",
+      fontSize: "22px",
+      cursor: "pointer",
+      zIndex: "999999",
+      userSelect: "none",
     });
+    this.gear.addEventListener("click", () => this.toggle());
+    document.body.appendChild(this.gear);
   }
 
-  function enableGestureShortcut() {
-    let lastTap = 0;
-    document.addEventListener("touchend", (e) => {
-      if (e.touches.length === 0 && e.changedTouches.length === 2) {
-        const now = Date.now();
-        if (now - lastTap < 400) {
-          toggleDebug();
-        }
-        lastTap = now;
-      }
+  createHUD() {
+    if (document.getElementById("debugHUD")) return;
+    this.hud = document.createElement("div");
+    this.hud.id = "debugHUD";
+    Object.assign(this.hud.style, {
+      position: "fixed",
+      bottom: "6px",
+      left: "8px",
+      background: "rgba(0,0,0,0.65)",
+      color: "#0ff",
+      fontSize: "11px",
+      fontFamily: "monospace",
+      padding: "4px 8px",
+      borderRadius: "4px",
+      zIndex: "999998",
+      pointerEvents: "none",
     });
+    document.body.appendChild(this.hud);
   }
 
-  function start() {
-    if (initialized) return;
-    try {
-      initDebug();
-      injectDebugCSS();
-      injectHUD();
-      injectPill();
-      enableTouchXY();
-      enableGestureShortcut();
-      ScreenIsolation.init();
-      initialized = true;
-
-      console.log("%c[LegacyWrapper] Debug wrapper active.", "color: lime;");
-
-      const badge = document.createElement("div");
-      badge.id = "debugBadge";
-      badge.innerText = "🧭 Debug Active v2.7.3-PILLRESTORE";
-      document.body.appendChild(badge);
-    } catch (err) {
-      console.error("[LegacyWrapper] Failed:", err);
+  toggle() {
+    this.enabled = !this.enabled;
+    if (this.enabled) {
+      this.activateDebug();
+    } else {
+      this.deactivateDebug();
     }
   }
 
-  window.addEventListener("DOMContentLoaded", start, { once: true });
-})();
+  activateDebug() {
+    document.body.classList.add("debug-mode");
+    this.updateHUD("Debug enabled");
+
+    // Enable XY tracking
+    document.addEventListener("touchstart", this.onTouchStart, { passive: true });
+
+    // Allow hitbox inspection but preserve scroll/navigation
+    const active = document.querySelector(".screen.active");
+    if (active) {
+      active.style.pointerEvents = "auto";
+      active.style.overflow = "auto";
+    }
+
+    DebugManager.broadcast("onEnable");
+  }
+
+  deactivateDebug() {
+    document.body.classList.remove("debug-mode");
+    this.updateHUD("Debug disabled");
+
+    // Remove all debug overlay elements
+    document.querySelectorAll(".debug-hitbox-layer, .debug-xy-overlay, .debug-touch-pointer")
+      .forEach(el => el.remove());
+
+    // Restore full navigation and scroll
+    const active = document.querySelector(".screen.active");
+    if (active) {
+      active.style.pointerEvents = "auto";
+      active.style.overflow = "auto";
+    }
+
+    // Remove XY listener to prevent duplicates
+    document.removeEventListener("touchstart", this.onTouchStart);
+
+    DebugManager.broadcast("onDisable");
+  }
+
+  onTouchStart(e) {
+    if (!window.LegacyWrapper?.enabled) return;
+    const t = e.touches[0];
+    const el = document.elementFromPoint(t.clientX, t.clientY);
+    const section = el?.closest(".screen");
+    const hud = document.getElementById("debugHUD");
+    if (!hud) return;
+    hud.innerHTML = `[XY] (${Math.round(t.clientX)}, ${Math.round(t.clientY)})<br>
+      Tag: ${el?.tagName || "(none)"}<br>
+      ID: ${el?.id || "(none)"}<br>
+      Screen: ${section?.id || "(none)"}`;
+  }
+
+  updateHUD(status) {
+    const hudEl = document.getElementById("debugHUD");
+    if (!hudEl) return;
+    hudEl.innerHTML = `[HUD] ${status}<br>
+      Screen: ${window.activeScreen || "none"}<br>
+      Version: ${this.version}`;
+  }
+}
+
+window.LegacyWrapper = new LegacyWrapper();
+window.addEventListener("DOMContentLoaded", () => {
+  window.LegacyWrapper.init();
+});
