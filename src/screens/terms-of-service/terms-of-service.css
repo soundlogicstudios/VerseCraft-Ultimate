@@ -1,5 +1,5 @@
 /* ======================================================
-   Terms of Service Screen - Visual Alignment v2.7.7.9
+   Terms of Service Screen - Positional Override Fix v2.7.7.10
    ====================================================== */
 
 .screen.terms-of-service {
@@ -7,10 +7,12 @@
   inset: 0;
   width: 100%;
   height: 100%;
+  display: block !important; /* override global flex */
   overflow: hidden;
+  background: transparent;
 }
 
-/* Ornate frame background */
+/* Background Frame */
 .screen.terms-of-service .screen-bg {
   position: absolute;
   inset: 0;
@@ -23,7 +25,7 @@
   pointer-events: none;
 }
 
-/* Main container for layout */
+/* Content Layout */
 .tos-shell {
   position: relative;
   z-index: 1;
@@ -35,12 +37,13 @@
   align-items: center;
   box-sizing: border-box;
   overflow: hidden;
+  padding: 0;
 }
 
-/* Title area — moved lower for visual centering */
+/* Title Position */
 .tos-header {
   flex: 0 0 auto;
-  margin-top: 12vh; /* pushes the title downward */
+  margin-top: 10vh; /* now will apply correctly */
   margin-bottom: 3vh;
   text-align: center;
 }
@@ -52,12 +55,12 @@
   text-shadow: 0 0 10px rgba(255,240,200,0.5);
 }
 
-/* Scrollable text box — lower + balanced on screen */
+/* Scrollable Text Box */
 .tos-scroll {
   flex: 1 1 auto;
   width: 80%;
   max-width: 720px;
-  height: 45vh; /* set explicit height for stable alignment */
+  height: 45vh;
   margin-top: 2vh;
   overflow-y: auto;
   overflow-x: hidden;
@@ -67,7 +70,6 @@
   padding: 18px;
   line-height: 1.45;
   color: #d6c8a2;
-  scrollbar-width: thin;
 }
 
 .tos-scroll::-webkit-scrollbar {
@@ -78,7 +80,7 @@
   border-radius: 3px;
 }
 
-/* Accept button */
+/* Accept Button */
 .tos-actions {
   flex: 0 0 auto;
   margin-top: 3vh;
@@ -86,7 +88,6 @@
 }
 
 #hbTosAccept {
-  position: relative;
   display: inline-block;
   background: rgba(255,255,255,0.1);
   border: 1px solid rgba(255,255,255,0.3);
@@ -105,7 +106,7 @@
 }
 
 /* =====================================================
-   PWA Safe-Area Override (iOS only)
+   iOS Safe-Area Override (PWA only)
    ===================================================== */
 @supports(padding: env(safe-area-inset-top)) {
   .screen.terms-of-service,
