@@ -1,5 +1,5 @@
 /* ======================================================
-   Terms of Service Screen - Alignment Fix v2.7.7.8
+   Terms of Service Screen - Visual Alignment v2.7.7.9
    ====================================================== */
 
 .screen.terms-of-service {
@@ -7,9 +7,10 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  overflow: hidden; /* prevent page scroll */
+  overflow: hidden;
 }
 
+/* Ornate frame background */
 .screen.terms-of-service .screen-bg {
   position: absolute;
   inset: 0;
@@ -22,7 +23,7 @@
   pointer-events: none;
 }
 
-/* Outer shell - locked to full view */
+/* Main container for layout */
 .tos-shell {
   position: relative;
   z-index: 1;
@@ -30,18 +31,18 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
-  padding: 0; /* remove default padding that caused insets */
   box-sizing: border-box;
   overflow: hidden;
 }
 
-/* Header title (centered at top) */
+/* Title area — moved lower for visual centering */
 .tos-header {
   flex: 0 0 auto;
+  margin-top: 12vh; /* pushes the title downward */
+  margin-bottom: 3vh;
   text-align: center;
-  margin-top: env(safe-area-inset-top, 12px);
 }
 
 .tos-title {
@@ -51,19 +52,20 @@
   text-shadow: 0 0 10px rgba(255,240,200,0.5);
 }
 
-/* Scroll container now bounds text safely */
+/* Scrollable text box — lower + balanced on screen */
 .tos-scroll {
   flex: 1 1 auto;
   width: 80%;
   max-width: 720px;
-  margin: 12px auto;
+  height: 45vh; /* set explicit height for stable alignment */
+  margin-top: 2vh;
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   background: rgba(0,0,0,0.4);
   border-radius: 8px;
-  padding: 16px;
-  line-height: 1.4;
+  padding: 18px;
+  line-height: 1.45;
   color: #d6c8a2;
   scrollbar-width: thin;
 }
@@ -76,10 +78,11 @@
   border-radius: 3px;
 }
 
-/* Accept button area */
+/* Accept button */
 .tos-actions {
   flex: 0 0 auto;
-  margin-bottom: env(safe-area-inset-bottom, 12px);
+  margin-top: 3vh;
+  margin-bottom: env(safe-area-inset-bottom, 10px);
 }
 
 #hbTosAccept {
@@ -100,12 +103,12 @@
   background: rgba(255,255,255,0.2);
   transform: scale(1.03);
 }
+
 /* =====================================================
    PWA Safe-Area Override (iOS only)
    ===================================================== */
 @supports(padding: env(safe-area-inset-top)) {
   .screen.terms-of-service,
-  .tos-header { margin-top: 2vh; }
   .tos-shell {
     padding-top: 0 !important;
     padding-bottom: 0 !important;
