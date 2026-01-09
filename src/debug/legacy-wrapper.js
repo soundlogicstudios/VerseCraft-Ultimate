@@ -1,8 +1,8 @@
 /*
  * VerseCraft Ultimate - Legacy Wrapper
- * v2.7.6-UltimateDiag
- * Diagnostic-safe build for viewport alignment, safe-area padding, and scroll locking.
- * Compatible with Ultimate architecture.
+ * v2.7.7-UltimateAlign
+ * Alignment stabilization patch for iOS PWA + Web.
+ * Corrects viewport offset, safe area insets, and restores consistent frame alignment.
  */
 
 import { DebugManager } from "./debug-manager.js";
@@ -10,10 +10,11 @@ import { DebugManager } from "./debug-manager.js";
 export class LegacyWrapper {
   constructor() {
     this.enabled = false;
-    this.version = "v2.7.6-UltimateDiag";
+    this.version = "v2.7.7-UltimateAlign";
     this.hud = null;
     this.gear = null;
     this.diagInterval = null;
+    this.insetCompensation = { top: 0, bottom: 0 };
   }
 
   init() {
@@ -21,8 +22,9 @@ export class LegacyWrapper {
     this.injectCSS();
     this.createGear();
     this.createHUD();
+    this.applySafeAreaAlignment();
     DebugManager.register("LegacyWrapper", this.version);
-    this.updateHUD("HUD waiting…");
+    this.updateHUD("HUD ready");
   }
 
   injectCSS() {
@@ -33,37 +35,35 @@ export class LegacyWrapper {
       html, body {
         overflow: hidden !important;
         height: 100%;
+        margin: 0;
+        padding: 0;
         touch-action: none;
         background-color: black;
+        box-sizing: border-box;
       }
 
-      /* Respect iPhone safe areas */
+      /* Safe area aware body */
       body {
         padding-left: env(safe-area-inset-left);
         padding-right: env(safe-area-inset-right);
         padding-top: env(safe-area-inset-top);
         padding-bottom: env(safe-area-inset-bottom);
-        box-sizing: border-box;
       }
 
-      /* Scroll unlock ONLY for ToS screen */
+      /* Terms of Service gets scroll unlock */
       #screen-tos, .screen-tos, #tosText {
         overflow-y: auto !important;
         touch-action: pan-y !important;
-        height: calc(100% - env(safe-area-inset-bottom)) !important;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
+        -webkit-overflow-scrolling: touch;
+        height: calc(100% - env(safe-area-inset-bottom));
       }
 
       /* Cyan hitbox outlines */
       body.debug-mode .hitbox,
       body.debug-mode [data-hitbox] {
-        outline: 2px dashed rgba(0,255,255,0.8);
+        outline: 2px dashed rgba(0,255,255,0.85);
         position: relative;
         z-index: 9999;
-        transform: translateX(calc(-1 * env(safe-area-inset-left)));
       }
 
       /* Debug HUD */
@@ -82,7 +82,7 @@ export class LegacyWrapper {
         text-shadow: 0 0 3px #000;
       }
 
-      /* Gear icon for toggle */
+      /* Gear icon */
       #debugGear {
         position: fixed;
         bottom: calc(6px + env(safe-area-inset-bottom));
@@ -109,17 +109,14 @@ export class LegacyWrapper {
     if (document.getElementById("debugHUD")) return;
     this.hud = document.createElement("div");
     this.hud.id = "debugHUD";
-    this.hud.textContent = "HUD waiting…";
+    this.hud.textContent = "HUD loading…";
     document.body.appendChild(this.hud);
   }
 
   toggle() {
     this.enabled = !this.enabled;
-    if (this.enabled) {
-      this.activateDebug();
-    } else {
-      this.deactivateDebug();
-    }
+    if (this.enabled) this.activateDebug();
+    else this.deactivateDebug();
   }
 
   activateDebug() {
@@ -169,14 +166,10 @@ export class LegacyWrapper {
     const update = () => {
       if (!hud || !this.enabled) return;
       const vv = window.visualViewport;
-      const sa = {
-        top: getComputedStyle(document.body).getPropertyValue("padding-top"),
-        bottom: getComputedStyle(document.body).getPropertyValue("padding-bottom"),
-        left: getComputedStyle(document.body).getPropertyValue("padding-left"),
-        right: getComputedStyle(document.body).getPropertyValue("padding-right")
-      };
+      const saTop = parseFloat(getComputedStyle(document.body).getPropertyValue("padding-top")) || 0;
+      const saBottom = parseFloat(getComputedStyle(document.body).getPropertyValue("padding-bottom")) || 0;
       hud.innerHTML += `<br>[Viewport] ${Math.round(vv.width)}×${Math.round(vv.height)}<br>
-        offsetY:${Math.round(vv.offsetTop)} insetT:${sa.top.trim()} insetB:${sa.bottom.trim()}`;
+        offsetY:${Math.round(vv.offsetTop)} insetT:${saTop}px insetB:${saBottom}px`;
     };
     this.diagInterval = setInterval(update, 1000);
   }
@@ -185,6 +178,25 @@ export class LegacyWrapper {
     if (this.diagInterval) {
       clearInterval(this.diagInterval);
       this.diagInterval = null;
+    }
+  }
+
+  applySafeAreaAlignment() {
+    const vv = window.visualViewport;
+    const body = document.body;
+    const insetT = parseFloat(getComputedStyle(body).getPropertyValue("padding-top")) || 0;
+    const insetB = parseFloat(getComputedStyle(body).getPropertyValue("padding-bottom")) || 0;
+
+    // Adaptive fix: when safe-area insets are detected, normalize frame scale
+    if (insetT > 0 || insetB > 0) {
+      this.insetCompensation.top = insetT;
+      this.insetCompensation.bottom = insetB;
+      const root = document.getElementById("app") || document.body;
+      root.style.transform = `translateY(${-(insetT / 2)}px)`;
+      root.style.height = `calc(100% - ${insetT + insetB}px)`;
+      console.log(`[LegacyWrapper] Safe-area compensation applied (T:${insetT}px, B:${insetB}px)`);
+    } else {
+      console.log("[LegacyWrapper] No safe-area compensation needed.");
     }
   }
 
@@ -197,7 +209,7 @@ export class LegacyWrapper {
   }
 }
 
-/* Register globally for Ultimate architecture */
+/* Register globally */
 if (typeof window !== "undefined") {
   window.LegacyWrapper = new LegacyWrapper();
   window.addEventListener("DOMContentLoaded", () => {
