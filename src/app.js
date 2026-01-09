@@ -1,54 +1,91 @@
-// VerseCraft v0.0.03-DEBUG1
-// Stable build with Legacy Debug Wrapper + Diagnostic
+/**
+ * ======================================================
+ *  VerseCraft Ultimate - Main Application Controller
+ *  Version: 2.7.7.2 (TOS Auto-Injector Patch)
+ *  Description:
+ *   - Initializes screens and hitboxes
+ *   - Manages navigation flow
+ *   - Integrates Debug Manager + Legacy Wrapper
+ *   - Injects Terms of Service content reliably
+ * ======================================================
+ */
 
-import { initRouter, go } from "./router.js";
-import { bindHitboxes } from "./input.js";
-import { initDebug } from "./debug.js";
-import "./debug/legacy-wrapper.js"; // Safe modular bridge
+import { DebugManager } from "./debug/debug-manager.js";
+import "./debug/legacy-wrapper.js";
+import "./debug/debug-hitbox.js";
 
-// ==============================
-// Terms of Service content
-// ==============================
+/* =====================================================
+   GLOBAL CONSTANTS
+   ===================================================== */
+const APP_VERSION = "v2.7.7.2-UltimateAlign";
 const TERMS_OF_SERVICE_TEXT = `
-<h2>VerseCraft Terms of Use</h2>
-<p><strong>Effective Date:</strong> [Insert Date]</p>
-<p>Welcome to VerseCraft! These Terms of Use (“Terms”) govern your use of the VerseCraft mobile app, website, and services (collectively, “Service”). By accessing or using the Service, you agree to these Terms.</p>
-<h3>1. Eligibility</h3>
-<ul><li>You must be at least 13 years old to use the Service.</li><li>Users under 18 must have parental consent.</li></ul>
-<h3>2. Account Registration</h3>
-<ul><li>You may need to create an account to access certain features.</li><li>Keep your login credentials secure; you are responsible for all activity under your account.</li><li>Notify VerseCraft immediately of any unauthorized use.</li></ul>
-<h3>3. User Content</h3>
-<ul><li>Users may submit stories, art, and other content (“User Content”).</li><li>By submitting User Content, you grant VerseCraft a worldwide, royalty-free, sublicensable, transferable license to display, distribute, modify, and monetize that content within the Service.</li><li>You retain ownership of your original content.</li></ul>
-<h3>4. Prohibited Conduct</h3>
-<ul><li>Post unlawful or infringing content.</li><li>Attempt to hack or interfere with the Service.</li><li>Use the Service commercially without permission.</li></ul>
-<h3>5. Intellectual Property</h3>
-<ul><li>All app content, branding, and software code is © [Year] VerseCraft LLC.</li></ul>
-<h3>6. Subscriptions & Payments</h3>
-<ul><li>Paid content is processed through platform app stores.</li></ul>
-<h3>7. Termination</h3>
-<ul><li>Accounts may be suspended for violations.</li></ul>
-<h3>8. Disclaimers</h3>
-<ul><li>The Service is provided “as is.”</li></ul>
-<h3>9. Limitation of Liability</h3>
-<ul><li>VerseCraft is not liable for damages to the extent permitted by law.</li></ul>
-<h3>10. Governing Law</h3>
-<ul><li>Governed by the laws of [State/Country].</li></ul>
-<p><strong>Contact:</strong> support@versecraft.com</p>
+  <p><strong>Welcome to VerseCraft!</strong></p>
+  <p>By continuing, you agree to the following terms:</p>
+  <ol>
+    <li>Your creative works remain your intellectual property.</li>
+    <li>VerseCraft may store anonymized usage data to improve performance.</li>
+    <li>You will refrain from submitting offensive or harmful content.</li>
+    <li>All use of this platform is at your own risk.</li>
+  </ol>
+  <p>Tap <strong>Accept</strong> below to continue your adventure.</p>
 `;
 
-const VERSION = "0.0.03-DEBUG1";
+/* =====================================================
+   SCREEN REGISTRY
+   ===================================================== */
+const SCREENS = [
+  "splash",
+  "tos",
+  "menu",
+  "settings",
+  "library",
+  "story",
+];
 
-function setFooter() {
-  const el = document.getElementById("footer");
-  if (!el) return;
-  const btn = document.getElementById("btnDebug");
-  el.textContent = `VerseCraft v${VERSION} • `;
-  if (btn) el.appendChild(btn);
+/* =====================================================
+   NAVIGATION UTILITIES
+   ===================================================== */
+let activeScreen = null;
+export function go(screenId) {
+  SCREENS.forEach((id) => {
+    const el = document.getElementById(`screen-${id}`);
+    if (el) el.classList.add("hidden");
+  });
+
+  const target = document.getElementById(`screen-${screenId}`);
+  if (target) {
+    target.classList.remove("hidden");
+    activeScreen = screenId;
+    console.log(`[NAV] → ${screenId}`);
+  } else {
+    console.warn(`[NAV] Screen not found: ${screenId}`);
+  }
 }
 
+export function currentScreen() {
+  return activeScreen;
+}
+
+/* =====================================================
+   HITBOX BINDINGS
+   ===================================================== */
+function bindHitboxes(map) {
+  Object.entries(map).forEach(([id, handler]) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("click", handler);
+  });
+}
+
+/* =====================================================
+   APPLICATION BOOT
+   ===================================================== */
 function boot() {
-  setFooter();
-  initRouter();
+  console.log(
+    `%cVerseCraft ${APP_VERSION} initializing...`,
+    "color:cyan;font-weight:bold;"
+  );
+
+  DebugManager.init?.();
 
   bindHitboxes({
     hbSplashTap: () => {
@@ -58,22 +95,52 @@ function boot() {
       }
       go("tos");
     },
+
     hbTosAccept: () => go("menu"),
-    hbMenuLoad: () => go("library"),
     hbMenuSettings: () => go("settings"),
+    hbMenuLoad: () => go("library"),
     hbSettingsBack: () => go("menu"),
-    hbSettingsClear: () => alert("Clear Save (placeholder)"),
-    hbSettingsTheme: () => alert("Theme (placeholder)"),
-    hbLibraryMenu: () => go("menu"),
-    hbLibraryStore: () => alert("Store: Coming Soon"),
+    hbLibraryBack: () => go("menu"),
     hbRow0: () => go("story"),
-    hbRow1: () => go("story"),
-    hbRow2: () => go("story"),
     hbStoryBack: () => go("library"),
   });
 
-  initDebug(); // start working debugger
-  go("splash"); // default start
+  // Set initial screen
+  go("splash");
+
+  console.log(`[BOOT] VerseCraft ${APP_VERSION} ready.`);
 }
 
+/* =====================================================
+   TOS AUTO-INJECTOR PATCH
+   ===================================================== */
+document.addEventListener("DOMContentLoaded", () => {
+  try {
+    const tosContainer =
+      document.getElementById("tosText") ||
+      document.getElementById("tos-scroll-container");
+
+    if (tosContainer && tosContainer.innerHTML.trim() === "") {
+      tosContainer.innerHTML = TERMS_OF_SERVICE_TEXT;
+      console.log("[TOS Injector] Auto-loaded Terms text on DOM ready.");
+    } else {
+      console.log("[TOS Injector] Terms text already populated.");
+    }
+  } catch (err) {
+    console.error("[TOS Injector] Failed:", err);
+  }
+});
+
+/* =====================================================
+   INITIALIZE ONCE DOM IS READY
+   ===================================================== */
 window.addEventListener("DOMContentLoaded", boot, { once: true });
+
+/* =====================================================
+   EXPORTS
+   ===================================================== */
+export const VerseCraftApp = {
+  version: APP_VERSION,
+  go,
+  currentScreen,
+};
