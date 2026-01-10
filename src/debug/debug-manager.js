@@ -1,54 +1,60 @@
 /**
- * VerseCraft Debug Manager
- * v0.1 - Registers and displays active debug modules
+ * debug-manager.js
+ * VerseCraft Ultimate v2.7.9 - Unified Debug Manager
  */
 
-export const DebugManager = (() => {
-  const modules = new Map();
+import { VERSION } from "../constants.js";
 
-  function register(name, version) {
-    modules.set(name, version);
-    updateHUD();
-    console.log(
-      `%c[${name}] registered with DebugManager (v${version})`,
-      "color: cyan; font-weight: bold;"
-    );
+class DebugManager {
+  constructor() {
+    this.active = false;
+    this.currentScreen = "none";
+    this.hud = null;
+    this.initHUD();
+    this.registerEvents();
   }
 
-  function updateHUD() {
-    let hud = document.getElementById("debug-hud");
-    if (!hud) {
-      hud = document.createElement("div");
-      hud.id = "debug-hud";
-      hud.style.position = "fixed";
-      hud.style.bottom = "6px";
-      hud.style.left = "6px";
-      hud.style.background = "rgba(0,0,0,0.65)";
-      hud.style.color = "#0ff";
-      hud.style.fontSize = "10px";
-      hud.style.fontFamily = "monospace";
-      hud.style.padding = "4px 6px";
-      hud.style.borderRadius = "4px";
-      hud.style.zIndex = "999999";
-      hud.style.pointerEvents = "none";
-      document.body.appendChild(hud);
+  initHUD() {
+    this.hud = document.createElement("div");
+    this.hud.id = "debug-hud";
+    this.hud.style.position = "fixed";
+    this.hud.style.bottom = "6px";
+    this.hud.style.left = "6px";
+    this.hud.style.zIndex = "999999";
+    this.hud.style.fontFamily = "monospace";
+    this.hud.style.fontSize = "11px";
+    this.hud.style.color = "#00ffff";
+    this.hud.style.background = "rgba(0,0,0,0.6)";
+    this.hud.style.padding = "6px 10px";
+    this.hud.style.borderRadius = "5px";
+    this.hud.innerHTML = `HUD Waiting<br>Version ${VERSION}<br>Screen none`;
+    document.body.appendChild(this.hud);
+  }
+
+  registerEvents() {
+    window.addEventListener("screenChanged", (e) => {
+      this.setScreen(e.detail.id);
+    });
+  }
+
+  toggle() {
+    this.active = !this.active;
+    this.hud.style.display = this.active ? "block" : "none";
+    console.log(`[DebugManager] HUD ${this.active ? "enabled" : "disabled"}`);
+  }
+
+  setScreen(screenId) {
+    this.currentScreen = screenId;
+    if (this.hud) {
+      this.hud.innerHTML = `
+        HUD Monitoring<br>
+        Screen: ${screenId}<br>
+        Version ${VERSION}
+      `;
     }
-    hud.innerHTML = Array.from(modules.entries())
-      .map(([name, version]) => `${name}: ${version}`)
-      .join("<br>");
   }
+}
 
-  function list() {
-    console.table(
-      Array.from(modules.entries()).map(([name, version]) => ({
-        Module: name,
-        Version: version,
-      }))
-    );
-  }
+export const DebugManagerInstance = new DebugManager();
 
-  return {
-    register,
-    list,
-  };
-})();
+console.log(`[DebugManager] Loaded (${VERSION})`);
