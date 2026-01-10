@@ -1,37 +1,20 @@
 /**
  * constants.js
- * v2.7.8-UltimateLifecycleDiag
- * Full replacement constants registry
+ * VerseCraft Ultimate v2.7.9 - Unified Constants
  */
 
-export const VERSION = 'v2.7.8-UltimateLifecycleDiag';
+export const APP_NAME = "VerseCraft Ultimate";
+export const VERSION = "2.7.9-Ultimate";
+export const DEBUG_MODE = true; // Toggle for forced debug HUD visibility
+export const DEBUG_PATH = "/debug"; // Path trigger for debug boot
 
-export const limits = {
-  equipSlots: 3,
-  carryCap: 20,
-  maxItemNameChars: 24,
-  maxSlotLabelChars: 14,
-  maxToastChars: 42,
-  globalTrophySlots: 3,
-  visualMilestones: [5, 10, 15, 20, 25]
+export const SCREEN_IDS = {
+  SPLASH: "splash",
+  TERMS: "terms-of-service",
+  MENU: "main-menu",
+  SETTINGS: "settings",
+  LIBRARY: "library",
+  STORY: "story"
 };
 
-export const globalSkins = [
-  'ancient-parchment',
-  'balanced-astral-gold',
-  'astral-violet',
-  'astral-arcane',
-  'wastelands-dust',
-  'sterile-clean'
-];
-
-export const titleRarities = ['common', 'rare', 'epic', 'legendary'];
-
-export const debug = {
-  enabled: true,
-  verbose: true,
-  showHUD: true,
-  safeMode: false
-};
-
-console.log(`🔧 [CONST] Loaded constants module ${VERSION}`);
+console.info(`[${APP_NAME}] Constants loaded – version ${VERSION}`);
