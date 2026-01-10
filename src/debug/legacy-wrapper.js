@@ -1,9 +1,10 @@
 /**
  * VerseCraft Ultimate – Legacy Wrapper
- * v2.7.7–UltimateAlign
+ * v2.7.7R2–UltimateAlignRefresh
  *
- * Alignment stabilization patch for iOS PWA + debug HUD.
- * Corrects viewport offset, safe area insets, and maintains HUD diagnostics.
+ * Restores functional HUD, adds auto-refresh loop for active screen detection,
+ * and fixes invisible gear (absolute path + cyan fallback).
+ * Maintains scroll lock, viewport insets, and DebugManager integration.
  */
 
 import { DebugManager } from "./debug-manager.js";
@@ -11,7 +12,7 @@ import { DebugManager } from "./debug-manager.js";
 export class LegacyWrapper {
   constructor() {
     this.enabled = false;
-    this.version = "v2.7.7–UltimateAlign";
+    this.version = "v2.7.7R2–UltimateAlignRefresh";
     this.hud = null;
     this.gear = null;
     this.diagInterval = null;
@@ -26,6 +27,7 @@ export class LegacyWrapper {
     this.applySafeAreaAlignment();
     DebugManager.register("LegacyWrapper", this.version);
     this.updateHUD("[HUD ready]");
+    this.startAutoHUD();
   }
 
   injectCSS() {
@@ -38,9 +40,12 @@ export class LegacyWrapper {
         position: fixed;
         bottom: 12px;
         right: 12px;
-        width: 28px;
-        height: 28px;
-        background: url('../assets/debug/gear.svg') center/contain no-repeat;
+        width: 32px;
+        height: 32px;
+        background: url('/src/assets/debug/gear.svg') center/contain no-repeat, rgba(0,255,255,0.15);
+        background-blend-mode: lighten;
+        border: 1px solid cyan;
+        border-radius: 50%;
         cursor: pointer;
         z-index: 9999;
       }
@@ -88,6 +93,13 @@ export class LegacyWrapper {
     console.log(`[LegacyWrapper] Debug ${state}`);
     this.updateHUD(`[HUD] ${state}`);
     DebugManager.setActive(this.enabled);
+  }
+
+  startAutoHUD() {
+    if (this.diagInterval) clearInterval(this.diagInterval);
+    this.diagInterval = setInterval(() => {
+      if (this.hud) this.updateHUD("[HUD monitoring]");
+    }, 500);
   }
 
   applySafeAreaAlignment() {
