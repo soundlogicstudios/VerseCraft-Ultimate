@@ -1,28 +1,38 @@
 /**
- * VerseCraft Debug Bootloader
- * v0.1
- * Ensures all debug modules load globally after DOM is ready
+ * debug-boot.js
+ * VerseCraft Ultimate v2.7.9 - Modern Debug Boot
  */
 
-window.addEventListener("DOMContentLoaded", async () => {
-  try {
-    console.log("%c[DebugBoot] Initializing Debug System...", "color: cyan");
+import { DebugManagerInstance } from "./debug-manager.js";
+import { VERSION } from "../constants.js";
 
-    // Import manager first
-    const { DebugManager } = await import("./debug-manager.js");
+console.info(`[VerseCraft Debug] Booting Ultimate Debug Suite v${VERSION}`);
 
-    // Load modules safely
-    await import("./debug-overlay.js");
-    await import("./debug-touch.js");
-    await import("./debug-hitbox.js");
+window.DebugManager = DebugManagerInstance;
 
-    // Log active modules
-    if (DebugManager && typeof DebugManager.list === "function") {
-      DebugManager.list();
-    }
+function initToggleButton() {
+  const btn = document.createElement("div");
+  btn.textContent = "⚙";
+  btn.title = "Toggle Debug HUD";
+  Object.assign(btn.style, {
+    position: "fixed",
+    bottom: "10px",
+    right: "10px",
+    background: "rgba(0,255,255,0.3)",
+    color: "#000",
+    fontSize: "18px",
+    borderRadius: "50%",
+    width: "34px",
+    height: "34px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    zIndex: 999999
+  });
 
-    console.log("%c[DebugBoot] All modules loaded successfully.", "color: lime");
-  } catch (err) {
-    console.error("[DebugBoot] Failed to load:", err);
-  }
-});
+  btn.addEventListener("click", () => DebugManagerInstance.toggle());
+  document.body.appendChild(btn);
+}
+
+document.addEventListener("DOMContentLoaded", initToggleButton);
