@@ -1,19 +1,17 @@
-// Debug: outlines hitboxes when enabled
-function parseDebug(){
-  const qs = new URLSearchParams(location.search);
-  return qs.get("debug") === "1";
+/**
+ * debug.js (Legacy Compatibility Stub)
+ * VerseCraft Ultimate v2.7.9 - Safe Mode
+ * 
+ * This module maintains backward compatibility for older imports.
+ * It does NOT initialize legacy debug UI or interfere with Ultimate Debug System.
+ */
+
+console.info("[VerseCraft] Legacy debug.js shim loaded (safe mode).");
+
+export async function initDebug() {
+  console.info("[VerseCraft] initDebug() called from legacy wrapper – safely ignored.");
+  return Promise.resolve();
 }
-
-export function initDebug(){
-  const btn = document.getElementById("btnDebug");
-  const body = document.body;
-
-  // initial
-  if (parseDebug()) body.classList.add("debug");
-
-  if (btn){
-    btn.addEventListener("click", () => {
-      body.classList.toggle("debug");
     });
   }
 }
