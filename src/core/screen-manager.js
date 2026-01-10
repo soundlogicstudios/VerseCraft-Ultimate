@@ -1,3 +1,9 @@
+/**
+ * screen-manager.js
+ * v2.7.8-UltimateLifecycleDiag
+ * Tracks mounted screens with lifecycle diagnostics
+ */
+
 const mounted = new Map();
 
 async function loadScreen(screenId) {
@@ -10,24 +16,43 @@ export const screenManager = {
 
   async init({ mountId, initialScreen }) {
     this.mountEl = document.getElementById(mountId);
-    if (!this.mountEl) throw new Error(`mount element not found: ${mountId}`);
+    if (!this.mountEl) throw new Error(`Mount element not found: ${mountId}`);
     await this.go(initialScreen);
   },
 
   async go(screenId, params = {}) {
-    // unmount previous
+    console.log(`➡️ [MANAGER] go(${screenId})`);
+
     if (this.current && mounted.has(this.current)) {
-      try { mounted.get(this.current).unmount?.(); } catch {}
+      try {
+        mounted.get(this.current).unmount?.();
+        console.log(`🔹 [MANAGER] Unmounted: ${this.current}`);
+      } catch (err) {
+        console.warn(`⚠️ [MANAGER] Error unmounting ${this.current}`, err);
+      }
     }
 
-    // hard clear (no hidden screens)
-    this.mountEl.innerHTML = '';
+    this.mountEl.innerHTML = "";
 
-    // mount new
-    const mod = await loadScreen(screenId);
-    const api = await mod.createScreen({ mountEl: this.mountEl, screenManager: this, params });
-    mounted.set(screenId, api);
-    this.current = screenId;
-    api.mount?.();
+    try {
+      const mod = await loadScreen(screenId);
+      const api =
+        typeof mod.createScreen === "function"
+          ? await mod.createScreen({ mountEl: this.mountEl, screenManager: this, params })
+          : typeof mod.default === "function"
+          ? await mod.default({ mountEl: this.mountEl, screenManager: this, params })
+          : null;
+
+      if (api) {
+        mounted.set(screenId, api);
+        this.current = screenId;
+        api.mount?.();
+        console.log(`✅ [MANAGER] Mounted screen: ${screenId}`);
+      } else {
+        console.warn(`⚠️ [MANAGER] Screen ${screenId} missing createScreen/default export`);
+      }
+    } catch (err) {
+      console.error(`❌ [MANAGER] Failed to load ${screenId}`, err);
+    }
   }
 };
