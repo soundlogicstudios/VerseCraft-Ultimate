@@ -1,40 +1,32 @@
 /**
  * bootstrap.js
- * Handles initialization, dependency loading, and error safety.
+ * v2.7.8-UltimateLifecycleDiag
+ * Handles initialization sequence and diagnostics
  */
 
-import { ScreenManager } from './screen-manager.js';
-import { StateStore } from './state-store.js';
-import { registerScreens } from './screen-registry.js';
+import { screenManager } from "./screen-manager.js";
+import { registerScreens } from "./screen-registry.js";
 
-export class Bootstrap {
-  static async init() {
-    try {
-      console.log('🚀 VerseCraft Engine initializing...');
+(async function bootstrap() {
+  try {
+    console.log("🚀 [BOOTSTRAP] VerseCraft initializing...");
 
-      await new Promise((resolve) => {
-        if (document.readyState === 'complete' || document.readyState === 'interactive')
-          resolve();
-        else
-          document.addEventListener('DOMContentLoaded', resolve);
-      });
+    await new Promise((resolve) => {
+      if (document.readyState === "complete" || document.readyState === "interactive")
+        resolve();
+      else document.addEventListener("DOMContentLoaded", resolve);
+    });
 
-      const state = new StateStore();
-      const screens = new ScreenManager(state);
+    const mountId = "screens";
+    await registerScreens(screenManager);
+    await screenManager.init({ mountId, initialScreen: "splash" });
 
-      await registerScreens(screens);
-
-      screens.load('main-menu');
-
-      console.log('✅ VerseCraft successfully initialized.');
-    } catch (err) {
-      console.error('❌ Engine failed to initialize:', err);
-      document.body.innerHTML = `<div style="color:red;padding:2em;font-family:sans-serif">
-        <h2>VerseCraft Engine Error</h2>
-        <p>${err.message}</p>
-      </div>`;
-    }
+    console.log("✅ [BOOTSTRAP] Initialization complete.");
+  } catch (err) {
+    console.error("❌ [BOOTSTRAP] Critical failure:", err);
+    document.body.innerHTML = `<div style="color:red;padding:2em;font-family:sans-serif">
+      <h2>VerseCraft Engine Error</h2>
+      <p>${err.message}</p>
+    </div>`;
   }
-}
-
-Bootstrap.init();
+})();
