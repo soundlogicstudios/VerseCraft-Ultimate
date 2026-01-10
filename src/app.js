@@ -10,8 +10,8 @@ import "./debug/legacy-wrapper.js"; // Safe modular bridge
 // Terms of Service content
 // ==============================
 const TERMS_OF_SERVICE_TEXT = `
-<h2>VerseCraft Terms of Use</h2>
-<p><strong>Effective Date:</strong> [Insert Date]</p>
+<h2><center>VerseCraft Terms of Use</center></h2>
+<p><strong>Effective Date:</strong> January 1, 2026</p>
 <p>Welcome to VerseCraft! These Terms of Use (“Terms”) govern your use of the VerseCraft mobile app, website, and services (collectively, “Service”). By accessing or using the Service, you agree to these Terms.</p>
 <h3>1. Eligibility</h3>
 <ul><li>You must be at least 13 years old to use the Service.</li><li>Users under 18 must have parental consent.</li></ul>
