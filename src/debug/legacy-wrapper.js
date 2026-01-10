@@ -10,7 +10,7 @@ import { DebugManager } from "./debug-manager.js";
 export class LegacyWrapper {
   constructor() {
     this.enabled = false;
-    this.version = "v2.7.7-UltimateAlign";
+    this.version = "v2.7.8-UltimateAlign";
     this.hud = null;
     this.gear = null;
     this.diagInterval = null;
