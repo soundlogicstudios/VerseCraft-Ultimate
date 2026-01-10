@@ -1,4 +1,10 @@
-export const version = 'v0.0.00';
+/**
+ * constants.js
+ * v2.7.8-UltimateLifecycleDiag
+ * Full replacement constants registry
+ */
+
+export const VERSION = 'v2.7.8-UltimateLifecycleDiag';
 
 export const limits = {
   equipSlots: 3,
@@ -20,3 +26,12 @@ export const globalSkins = [
 ];
 
 export const titleRarities = ['common', 'rare', 'epic', 'legendary'];
+
+export const debug = {
+  enabled: true,
+  verbose: true,
+  showHUD: true,
+  safeMode: false
+};
+
+console.log(`🔧 [CONST] Loaded constants module ${VERSION}`);
