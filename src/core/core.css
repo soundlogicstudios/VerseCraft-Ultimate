@@ -1,0 +1,38 @@
+/* core css: safe global resets only. no screen-specific layout here. */
+:root {
+  --vc-bg:#000;
+  --vc-fg:#fff;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--vc-bg);
+  color: var(--vc-fg);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  overflow: hidden;           /* global scroll lock */
+  touch-action: manipulation; /* reduce safari gesture conflicts */
+}
+
+.app-root {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#debug-overlay-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999999;
+}
